@@ -5,11 +5,23 @@ conn = psycopg2.connect(database='LKP Delta Kreatif', user='postgres', password=
 
 cur = conn.cursor()
 
-def Login(username, password):
-    query = f"select username from admin where username ilike '{username}'"
-    cur.execute(query)
-    data = cur.fetchall()
-    
+def Login():
+    while True:
+        username = input('Username: ')
+        password = input('Password: ')
+        
+        query = "SELECT username, password FROM admin WHERE username = %s"
+        cur.execute(query, (username,))
+        data = cur.fetchone()
+        
+        if data and data[1] == password:
+            homepageSiswa()
+            break
+        else:
+            print("Username atau password kamu ada yang salah sepertinya.")
+            try_again = input("Coba lagi? (y/n): ").strip().lower()
+            if try_again != 'y':
+                break
 
 def Register():
     nama_siswa = input("Enter Nama Siswa: ")
@@ -22,7 +34,7 @@ def Register():
     elif bekerja_atau_sekolah == 'n':
         bekerja_atau_sekolah = 0
     else:
-        print('inputanmu salah nih')
+        print('Inputanmu salah nih')
 
     username = input("Enter Username: ")
     password = input("Enter Password: ")
@@ -34,52 +46,37 @@ def Register():
     query = """
         INSERT INTO siswa (
             nama_siswa, umur_siswa, gender_siswa, bekerja_atau_sekolah, username, password, provinsi, kabupaten, kecamatan, jalan
-        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """
     cur.execute(query, (nama_siswa, umur_siswa, gender_siswa, bekerja_atau_sekolah, username, password, provinsi, kabupaten, kecamatan, jalan))
     conn.commit()
 
-    print("data mu sudah terupload.")
+    print("Data mu sudah terupload.")
+    print("Silahkan login kembali.")
 
-def homepageAdmin():
-    print(f'Selamat Datang')
-
-def readPelatih():
-    query = "SELECT * FROM Pelatih"
-    cur.execute(query)
-    data = cur.fetchall()
-    
-    if data:
-
-        colnames = [desc[0] for desc in cur.description]
-
-        print(tabulate(data, headers=colnames, tablefmt='grid'))
-    else:
-        print("Tidak ada data pada tabel pelatih.")
+def homepageSiswa():
+    print("Halo, selamat datang!")
 
 def startup():
     while True:
-        print("siapakah kamu? :")
+        print("Selamat Datang di LKP Delta Kreatif:")
         print("1. Login\n"
               "2. Register\n"
               "3. Exit\n")
-        pilihan = int(input("silahkan di pilih: "))
+        pilihan = int(input("Silahkan dipilih: "))
         match pilihan:
             case 1:
-                username = input('username : ')
-                password = input('password : ')
-                Login(username, password)
+                Login()
             case 2:
                 Register()
             case 3:
                 print("Keluar...")
                 break
             case _:
-                print("ups, Inputan kamu sepertinya salah.")
+                print("Ups, inputan kamu sepertinya salah.")
 
 startup()
 
-#kelas
-#pelatih
-#siswa
-        
+# Jangan lupa untuk menutup cursor dan koneksi setelah selesai
+cur.close()
+conn.close()
