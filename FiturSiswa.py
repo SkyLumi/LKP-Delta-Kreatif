@@ -20,7 +20,11 @@ def cekKelasSiswa(username):
         return i
 
 def pemilihanKelas():
-    query = "SELECT nama_kelas, jk.nama_jenis_kelas, jk.deskripsi, hari, waktu FROM kelas k join jenis_kelas jk on k.id_jenis_kelas = jk.id_jenis_kelas"
+    query = """SELECT nama_kelas, p.nama_pelatih, hari, waktu 
+                FROM kelas k 
+                join jenis_kelas jk on k.id_jenis_kelas = jk.id_jenis_kelas 
+                join pelatih p on k.id_pelatih = p.id_pelatih
+                where jk.nama_jenis_kelas like 'Teori'"""
     cur.execute(query)
     data = cur.fetchall()
     if data:
@@ -34,5 +38,12 @@ def homepageSiswa(username):
     print(f"Halo {nama}, selamat datang!")
     kelas = cekKelasSiswa(username)
     if kelas == None:
+        print('Silahkan pilih kelas dulu ya')
         pemilihanKelas()
-
+        print('Setiap minggu diharuskan memiliki 4 pertemuan ()')
+        try:
+            input(int('Silahkan pilih kelas terlebih dahulu: '))
+        except ValueError:
+            print('harus berupa angka ya')
+    else:
+        print('jadwal')
