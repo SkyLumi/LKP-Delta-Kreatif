@@ -20,5 +20,3 @@ def readPelatih():
 
 def homepagePelatih():
     print('ini homepage pelatih')
-
-readPelatih()
