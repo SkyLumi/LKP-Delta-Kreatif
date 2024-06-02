@@ -5,6 +5,17 @@ conn = psycopg2.connect(database='LKP Delta Kreatif', user='postgres', password=
 
 cur = conn.cursor()
 
+def fetchKelasSiswa(username):
+    query = """
+        SELECT id_kelas, nama_kelas, nama_pelatih, hari, waktu 
+        FROM siswa s
+        JOIN classes c ON s.id_kelas = c.class_id
+        WHERE s.username = %s
+    """
+    cur.execute(query, (username,))
+    result = cur.fetchone()
+    return result[0] if result else None
+
 def fetchNamaSiswa(username):
     query = f"SELECT nama_siswa FROM siswa WHERE username = '{username}'"
     cur.execute(query)
@@ -18,13 +29,28 @@ def cekKelasSiswa(username):
     data = cur.fetchone()
     for i in data:
         return i
+    
+def updateKelasSiswa(username, kelas_id):
+    cur.execute("UPDATE siswa SET id_kelas = %s WHERE username = %s", (kelas_id, username))
+    conn.commit()
+
+
+def cekKelas(id_kelas):
+    query = f"""SELECT id_kelas, nama_kelas, nama_pelatih, hari, waktu 
+                FROM kelas k
+                join jenis_kelas jk on k.id_jenis_kelas = jk.id_jenis_kelas 
+                join pelatih p on k.id_pelatih = p.id_pelatih 
+                WHERE id_kelas = '{id_kelas}'"""
+    cur.execute(query)
+    data = cur.fetchall()
+    colnames = [desc[0] for desc in cur.description]
+    print(tabulate(data, headers=colnames, tablefmt='grid'))
 
 def pemilihanKelas():
-    query = """SELECT nama_kelas, p.nama_pelatih, hari, waktu 
+    query = """SELECT id_kelas, nama_kelas, p.nama_pelatih, hari, waktu 
                 FROM kelas k 
                 join jenis_kelas jk on k.id_jenis_kelas = jk.id_jenis_kelas 
-                join pelatih p on k.id_pelatih = p.id_pelatih
-                where jk.nama_jenis_kelas like 'Teori'"""
+                join pelatih p on k.id_pelatih = p.id_pelatih"""
     cur.execute(query)
     data = cur.fetchall()
     if data:
@@ -40,9 +66,15 @@ def homepageSiswa(username):
     if kelas == None:
         print('Silahkan pilih kelas dulu ya')
         pemilihanKelas()
-        print('Setiap minggu diharuskan memiliki 4 pertemuan ()')
         try:
-            int(input('Silahkan pilih kelas terlebih dahulu: '))
+            kelas = int(input('masukkan nama kelasnya: '))
+            cekKelas(kelas)
+            confirm = input('Yakin memilih ini? (y/n): ')
+            if confirm == 'y':
+                updateKelasSiswa(username, kelas)
+                print("Kelas telah dipilih.")
+            else:
+                print("Pemilihan kelas dibatalkan.")
         except ValueError:
             print('harus berupa angka ya')
     else:
