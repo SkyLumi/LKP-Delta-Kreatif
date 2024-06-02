@@ -120,7 +120,7 @@ def Register():
 
 def startup():
     while True:
-        print("Selamat Datang di LKP Delta Kreatif:")
+        print("Selamat Datang di LKP Delta Kreatif:\n")
         print("1. Login\n"
               "2. Register\n"
               "3. Exit\n")
