@@ -42,7 +42,7 @@ def homepageSiswa(username):
         pemilihanKelas()
         print('Setiap minggu diharuskan memiliki 4 pertemuan ()')
         try:
-            input(int('Silahkan pilih kelas terlebih dahulu: '))
+            int(input('Silahkan pilih kelas terlebih dahulu: '))
         except ValueError:
             print('harus berupa angka ya')
     else:
