@@ -18,7 +18,7 @@ def cekIDSiswa(username):
 
 def readPelatih(username):
     query = f"""
-        select p.nama_pelatih, p.kontak_pelatih, p.kabupaten ||', '|| p.kecamatan ||', '|| p.jalan as Alamat
+        select p.nama_pelatih, p.kontak_pelatih, p.provinsi ||', '|| p.kabupaten ||', '|| p.kecamatan ||', '|| p.jalan as Alamat
         FROM siswa s
         JOIN kelas k on s.id_kelas = k.id_kelas
         join pelatih p on k.id_pelatih = p.id_pelatih
@@ -101,11 +101,14 @@ def pemilihanKelas():
         print("Tidak ada data pada tabel pelatih.")
         
 def cekSertifikat(id_siswa):
-    query = f"SELECT id_siswa FROM siswa WHERE id_siswa = '{id_siswa}'"
-    cur.execute(query)
-    data = cur.fetchone()
-    for i in data:
-        return i
+    try:
+        query = f"SELECT id_siswa FROM siswa WHERE id_siswa = '{id_siswa}'"
+        cur.execute(query)
+        data = cur.fetchone()
+        for i in data:
+            return i
+    except ValueError:
+        print('sepertinya kamu belum mendapatkan sertifikat nih, semangat ya')
 
 def homepageSiswa(username):
     while True:
@@ -135,6 +138,7 @@ def homepageSiswa(username):
             print("1. informasi pelatih: ")
             print("2. informasi kelas")
             print("3. cek sertifikat")
+            print("4. Keluar")
             try:
                 choice = int(input("\nsilahkan pilih:  "))
                 match choice:
@@ -149,6 +153,10 @@ def homepageSiswa(username):
                     case 3:
                         id_siswa = cekIDSiswa(username)
                         cekSertifikat(id_siswa)
+                        input("Enter untuk kembali...")
+                        continue
+                    case 4:
+                        break
             except ValueError:
                 print('harus angka yah')
                 time.sleep(2)

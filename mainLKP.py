@@ -31,7 +31,7 @@ def Login():
         
         if check_credentials('admin', username, password):
             clear()
-            Fa.homepageAdmin()
+            Fa.homepageAdmin(username)
             break
         elif check_credentials('pelatih', username, password):
             clear()
@@ -78,7 +78,7 @@ def Register():
             clear()
             continue
         elif bekerja_atau_sekolah == 'n':
-            bekerja_atau_sekolah = 0
+            print('kamu memenuhi persyaratan LKP Delta Kreatif')
         else:
             print('Inputan bekerja atau sekolah kamu ada yang salah nih.')
             time.sleep(2)
