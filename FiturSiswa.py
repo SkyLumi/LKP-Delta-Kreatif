@@ -1,22 +1,16 @@
 import psycopg2
 from tabulate import tabulate
 import time
+import os
 
 conn = psycopg2.connect(database='LKP Delta Kreatif', user='postgres', password='bebas', host='localhost', port=5432)
 
 cur = conn.cursor()
 
-def cekIDSiswa(username):
-    query = f"""
-            select id_siswa
-            from siswa
-            where username == '{username}'"""
-    cur.execute(query)
-    data = cur.fetchone()
-    for i in data:
-        return i
+def clear():
+    os.system('cls' if os.name == 'nt' else 'clear')
 
-def readPelatih(username):
+def cekPelatih(username):
     query = f"""
         select p.nama_pelatih, p.kontak_pelatih, p.provinsi ||', '|| p.kabupaten ||', '|| p.kecamatan ||', '|| p.jalan as Alamat
         FROM siswa s
@@ -76,7 +70,7 @@ def cekKelas(id_kelas):
 
 def cekKelasMore(username):
     query = f"""
-        SELECT k.nama_kelas, jk.jenis_kelas, jk.deskripsi
+        SELECT k.nama_kelas, jk.nama_jenis_kelas, jk.deskripsi
         FROM siswa s
         JOIN kelas k on s.id_kelas = k.id_kelas
         join jenis_kelas jk on k.id_jenis_kelas = jk.id_jenis_kelas
@@ -100,18 +94,26 @@ def pemilihanKelas():
     else:
         print("Tidak ada data pada tabel pelatih.")
         
-def cekSertifikat(id_siswa):
-    try:
-        query = f"SELECT id_siswa FROM siswa WHERE id_siswa = '{id_siswa}'"
-        cur.execute(query)
-        data = cur.fetchone()
-        for i in data:
-            return i
-    except ValueError:
-        print('sepertinya kamu belum mendapatkan sertifikat nih, semangat ya')
+def cekSertifikat(username):
+    query = f"""SELECT deskripsi, s.nama_siswa FROM sertifikat se
+                join siswa s on se.id_siswa = s.id_siswa
+                WHERE username = '{username}'"""
+    cur.execute(query)
+    data = cur.fetchall()
+    if data:
+        colnames = [desc[0] for desc in cur.description]
+        print(tabulate(data, headers=colnames, tablefmt='grid'))  
+        choice = input("apakah kamu ingin mendownload? (y/n): ")
+        if choice == 'y' or '':
+            print('sertifikat sedang di unduh..')
+            time.sleep(2)
+            print('sertifikat sudah di download')
+    else:
+        print('maaf kamu belum mempunyai sertifikat, semangat mengikuti pelatihan!')
 
 def homepageSiswa(username):
     while True:
+        clear()
         nama = fetchNamaSiswa(username)
         print(f"Halo {nama}, selamat datang!")
         kelas = cekKelasSiswa(username)
@@ -143,7 +145,7 @@ def homepageSiswa(username):
                 choice = int(input("\nsilahkan pilih:  "))
                 match choice:
                     case 1:
-                        readPelatih(username)
+                        cekPelatih(username)
                         input("Enter untuk kembali...")
                         continue
                     case 2:
@@ -151,11 +153,11 @@ def homepageSiswa(username):
                         input("Enter untuk kembali...")
                         continue
                     case 3:
-                        id_siswa = cekIDSiswa(username)
-                        cekSertifikat(id_siswa)
+                        cekSertifikat(username)
                         input("Enter untuk kembali...")
                         continue
                     case 4:
+                        clear()
                         break
             except ValueError:
                 print('harus angka yah')

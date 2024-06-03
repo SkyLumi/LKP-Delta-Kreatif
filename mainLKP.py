@@ -2,6 +2,7 @@ import FiturAdmin as Fa
 import FiturPelatih as Fp
 import FiturSiswa as Fs
 import psycopg2
+import Design as ui
 from tabulate import tabulate
 import os
 import time
@@ -44,7 +45,7 @@ def Login():
         else:
             print("Username atau password kamu ada yang salah sepertinya.")
             try_again = input("Coba lagi? (y/n): ").strip().lower()
-            if try_again != 'y':
+            if try_again != 'y' or '':
                 clear()
                 break
             else:
@@ -53,7 +54,7 @@ def Login():
 
 def Register():
     while True:
-        clear()
+        ui.logoDeltaKreatif()
         nama_siswa = input("Enter Nama Siswa: ")
         
         try:
@@ -120,6 +121,7 @@ def Register():
 
 def startup():
     while True:
+        ui.logoDeltaKreatif()
         print("Selamat Datang di LKP Delta Kreatif:\n")
         print("1. Login\n"
               "2. Register\n"
@@ -128,6 +130,7 @@ def startup():
         match pilihan:
             case 1:
                 clear()
+                ui.logoDeltaKreatif()
                 Login()
             case 2:
                 clear()
@@ -138,12 +141,12 @@ def startup():
                 clear()
                 break
             case _:
+                ui.logoDeltaKreatif()
                 print("Ups, inputan kamu sepertinya salah.")
                 time.sleep(1)
                 clear()
 clear()
 startup()
 
-# Jangan lupa untuk menutup cursor dan koneksi setelah selesai
 cur.close()
 conn.close()

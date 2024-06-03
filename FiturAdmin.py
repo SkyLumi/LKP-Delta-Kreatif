@@ -1,5 +1,6 @@
 import psycopg2
 from tabulate import tabulate
+import readController as rc
 import time
 import os
 
@@ -9,10 +10,11 @@ cur = conn.cursor()
 
 def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
-
-def viewPelatih():
-    query = """select id_pelatih, nama_pelatih, kontak_pelatih, provinsi ||', '||kabupaten ||', '|| kecamatan ||', '|| jalan as Alamat
-                from pelatih"""
+    
+def selectIDPelatih(id_pelatih):
+    query = f"""select id_pelatih, nama_pelatih, kontak_pelatih, provinsi ||', '||kabupaten ||', '|| kecamatan ||', '|| jalan as Alamat
+                from pelatih
+                where id_pelatih = {id_pelatih}"""
     cur.execute(query)
     data = cur.fetchall()
     if data:
@@ -20,86 +22,38 @@ def viewPelatih():
         print(tabulate(data, headers=colnames, tablefmt='grid'))
     else:
         print("Tidak ada data pada tabel pelatih.")
-
-def viewAdmin():
-    query = """select id_admin, nama_admin, nomor_telepon, provinsi ||', '||kabupaten ||', '|| kecamatan ||', '|| jalan as Alamat
-                from admin"""
-    cur.execute(query)
-    data = cur.fetchall()
-    if data:
-        colnames = [desc[0] for desc in cur.description]
-        print(tabulate(data, headers=colnames, tablefmt='grid'))
-    else:
-        print("Tidak ada data pada tabel pelatih.")
-    
-def selectIDPelatih(id_admin):
-    query = f"""select id_admin, nama_admin, nomor_telepon, provinsi ||', '||kabupaten ||', '|| kecamatan ||', '|| jalan as Alamat
-                from admin
-                where id_admin = {id_admin}"""
-    cur.execute(query)
-    data = cur.fetchall()
-    if data:
-        colnames = [desc[0] for desc in cur.description]
-        print(tabulate(data, headers=colnames, tablefmt='grid'))
-    else:
-        print("Tidak ada data pada tabel pelatih.")
-
-def viewStudents():
-    query = """select id_siswa, nama_siswa, umur_siswa, gender_siswa, username, provinsi ||', '|| kabupaten ||', '|| kecamatan ||', '|| jalan as Alamat, k.nama_kelas ||', '|| jk.nama_jenis_kelas as kelas_siswa 
-                from siswa s
-                join kelas k on s.id_kelas = k.id_kelas
-                join jenis_kelas jk on k.id_jenis_kelas = jk.id_jenis_kelas"""
-    cur.execute(query)
-    data = cur.fetchall()
-    
-    if data:
-        colnames = [desc[0] for desc in cur.description]
-        print(tabulate(data, headers=colnames, tablefmt="grid"))
-    else:
-        print("Tidak ada data siswa yang ditemukan.")
-
-def viewkelas():
-    query = "SELECT * FROM kelas"
-    cur.execute(query)
-    data = cur.fetchall()
-    
-    if data:
-        colnames = [desc[0] for desc in cur.description]
-        print(tabulate(data, headers=colnames, tablefmt="grid"))
-    else:
-        print("Tidak ada data kelas yang ditemukan.")
 
 def addClass():
     while True:
         nama_kelas = input("Masukkan nama kelas baru: ")
-        if nama_kelas.lower() == 'exit':
+        if nama_kelas == 'exit':
             break
         
-        viewPelatih()
+        rc.viewPelatih()
         
         try:
             id_pelatih_input = input("Masukkan nama pelatih yang akan mengajar: ")
-            if id_pelatih_input.lower() == 'exit':
+            if id_pelatih_input == 'exit':
                 break
             id_pelatih = int(id_pelatih_input)
             
             selectIDPelatih(id_pelatih)
             
             choice = input("Apakah ingin menginput pelatih ini (y/n): ")
-            if choice.lower() == 'exit':
+            if choice == 'exit':
                 break
-            if choice.lower() != 'y':
+            elif choice != 'y' or '':
                 continue
 
-            viewAdmin()
+            rc.viewAdmin()
             
             id_admin_input = input("Masukkan admin yang akan mengelola kelas: ")
-            if id_admin_input.lower() == 'exit':
+            if id_admin_input == 'exit':
                 break
             id_admin = int(id_admin_input)
 
             id_jenis_kelas_input = input("Masukkan jenis kelas: ")
-            if id_jenis_kelas_input.lower() == 'exit':
+            if id_jenis_kelas_input == 'exit':
                 break
             id_jenis_kelas = int(id_jenis_kelas_input)
         
@@ -108,11 +62,11 @@ def addClass():
             continue
         
         waktu = input("Masukkan waktu kelas baru: ")
-        if waktu.lower() == 'exit':
+        if waktu == 'exit':
             break
         
         hari = input("Masukkan hari: ")
-        if hari.lower() == 'exit':
+        if hari == 'exit':
             break
         
         query = "INSERT INTO kelas (nama_kelas, id_pelatih, id_admin, id_jenis_kelas, waktu, hari) VALUES (%s, %s, %s, %s, %s, %s)"
@@ -124,13 +78,57 @@ def addClass():
         clear()
         break
 
+def addPelatih():
+    while True:
+        try:
+            nama_pelatih = input("Masukkan nama pelatih: ")
+            if nama_pelatih == 'exit':
+                break
 
-def removeClass():
-    class_id = input("Masukkan ID kelas yang ingin dihapus: ")
-    query = "DELETE FROM kelas WHERE class_id = %s"
-    cur.execute(query, (class_id,))
-    conn.commit()
-    print("Kelas telah dihapus.")
+            kontak_pelatih_input = input("Masukkan kontak pelatih: ")
+            if kontak_pelatih_input == 'exit':
+                break
+            kontak_pelatih = int(kontak_pelatih_input)
+
+            username = input("Masukkan username: ")
+            if username == 'exit':
+                break
+
+            password = input("Masukkan password: ")
+            if password == 'exit':
+                break
+
+            provinsi = input("Masukkan provinsi: ")
+            if provinsi == 'exit':
+                break
+
+            kabupaten = input("Masukkan kabupaten: ")
+            if kabupaten == 'exit':
+                break
+
+            kecamatan = input("Masukkan kecamatan: ")
+            if kecamatan == 'exit':
+                break
+
+            jalan = input("Masukkan jalan: ")
+            if jalan == 'exit':
+                break
+
+            query = """
+                INSERT INTO pelatih (nama_pelatih, kontak_pelatih, username, password, provinsi, kabupaten, kecamatan, jalan)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            cur.execute(query, (nama_pelatih, kontak_pelatih, username, password, provinsi, kabupaten, kecamatan, jalan))
+            conn.commit()
+            print("Pelatih baru telah ditambahkan.")
+
+        except ValueError:
+            print('Kontak pelatih harus berupa angka.')
+            continue
+
+        except Exception as e:
+            print(f"Terjadi kesalahan: {e}")
+            conn.rollback()
 
 def homepageAdmin(username):
     while True:
@@ -139,18 +137,18 @@ def homepageAdmin(username):
         print("1. Lihat siswa")
         print("2. Lihat kelas")
         print("3. Tambah kelas")
-        print("4. Hapus kelas")
+        print("4. Tambah pelatih")
         print("5. Logout")
         
         choice = input("Pilih opsi: ")
         
         if choice == '1':
             clear()
-            viewStudents()
+            rc.viewStudents()
             input("Tekan Enter untuk melanjutkan...")
         elif choice == '2':
             clear()
-            viewkelas()
+            rc.viewkelas()
             input("Tekan Enter untuk melanjutkan...")
         elif choice == '3':
             clear()
@@ -158,7 +156,7 @@ def homepageAdmin(username):
             input("Tekan Enter untuk melanjutkan...")
         elif choice == '4':
             clear()
-            removeClass()
+            addPelatih
             input("Tekan Enter untuk melanjutkan...")
         elif choice == '5':
             clear()

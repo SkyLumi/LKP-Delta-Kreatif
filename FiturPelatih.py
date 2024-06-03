@@ -5,8 +5,6 @@ conn = psycopg2.connect(database='LKP Delta Kreatif', user='postgres', password=
 
 cur = conn.cursor()
 
-
-
 def homepagePelatih():
-    print('ini homepage pelatih')
+    print('')
     
