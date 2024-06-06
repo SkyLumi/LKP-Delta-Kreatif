@@ -1,11 +1,12 @@
-import psycopg2
+from connectDatabase import database as db
 from tabulate import tabulate
 import readController as rc
+import BahanMentah as bm
 import time
+import fiturSearch as search
 import os
 
-conn = psycopg2.connect(database='LKP Delta Kreatif', user='postgres', password='bebas', host='localhost', port=5432)
-
+conn = db()
 cur = conn.cursor()
 
 def clear():
@@ -22,6 +23,27 @@ def selectIDPelatih(id_pelatih):
         print(tabulate(data, headers=colnames, tablefmt='grid'))
     else:
         print("Tidak ada data pada tabel pelatih.")
+
+def selectByIDAdmin(id_admin):
+    query = f"""select id_admin, nama_admin, nomor_telepon, provinsi ||', '||kabupaten ||', '|| kecamatan ||', '|| jalan as Alamat
+                from admin
+                where id_admin = {id_admin}"""
+    cur.execute(query)
+    data = cur.fetchall()
+    if data:
+        colnames = [desc[0] for desc in cur.description]
+        print(tabulate(data, headers=colnames, tablefmt='grid'))
+    else:
+        print("Tidak ada data pada tabel pelatih.")
+
+def checkIdAdminByUsername(username):
+    query = f"""select id_admin
+                from admin
+                where username = '{username}'"""
+    cur.execute(query)
+    data = cur.fetchone()
+    for i in data:
+        return i
 
 def addClass():
     while True:
@@ -52,16 +74,28 @@ def addClass():
                 break
             id_admin = int(id_admin_input)
 
+            selectByIDAdmin(id_admin_input)
+
+            choice = input("Apakah ingin menginput pelatih ini (y/n): ")
+            if choice == 'exit':
+                break
+            elif choice != 'y' or '':
+                continue
+
+            rc.viewJenisKelas()
+
             id_jenis_kelas_input = input("Masukkan jenis kelas: ")
             if id_jenis_kelas_input == 'exit':
                 break
             id_jenis_kelas = int(id_jenis_kelas_input)
-        
+            
+            
+            
         except ValueError:
             print('Yang diinputkan harus berupa angka ya')
             continue
         
-        waktu = input("Masukkan waktu kelas baru: ")
+        waktu = input("Masukkan waktu: ")
         if waktu == 'exit':
             break
         
@@ -121,6 +155,8 @@ def addPelatih():
             cur.execute(query, (nama_pelatih, kontak_pelatih, username, password, provinsi, kabupaten, kecamatan, jalan))
             conn.commit()
             print("Pelatih baru telah ditambahkan.")
+            time.sleep(2)
+            break
 
         except ValueError:
             print('Kontak pelatih harus berupa angka.')
@@ -138,14 +174,18 @@ def homepageAdmin(username):
         print("2. Lihat kelas")
         print("3. Tambah kelas")
         print("4. Tambah pelatih")
-        print("5. Logout")
+        print("5. Input bahan mentah")
+        print("6. Lihat bahan mentah")
+        print("7. Lihat Pelatih")
+        print("8. Logout")
         
         choice = input("Pilih opsi: ")
         
         if choice == '1':
             clear()
             rc.viewStudents()
-            input("Tekan Enter untuk melanjutkan...")
+            print('search siswa')
+            search.searchSiswa()
         elif choice == '2':
             clear()
             rc.viewkelas()
@@ -156,9 +196,22 @@ def homepageAdmin(username):
             input("Tekan Enter untuk melanjutkan...")
         elif choice == '4':
             clear()
-            addPelatih
+            addPelatih()
             input("Tekan Enter untuk melanjutkan...")
         elif choice == '5':
+            clear()
+            id_admin = checkIdAdminByUsername(username)
+            bm.addBahanMentah(id_admin)
+            input("Tekan Enter untuk melanjutkan...")
+        elif choice == '6':
+            clear()
+            rc.viewBahanMentah()
+            input("Tekan Enter untuk melanjutkan...")
+        elif choice == '7':
+            clear()
+            rc.viewPelatih()
+            input("Tekan Enter untuk melanjutkan...")
+        elif choice == '8':
             clear()
             break
         else:

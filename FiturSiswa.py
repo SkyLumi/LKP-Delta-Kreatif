@@ -1,14 +1,11 @@
-import psycopg2
+from connectDatabase import database as db
 from tabulate import tabulate
 import time
-import os
+from clear import clear
 
-conn = psycopg2.connect(database='LKP Delta Kreatif', user='postgres', password='bebas', host='localhost', port=5432)
+conn = db()
 
 cur = conn.cursor()
-
-def clear():
-    os.system('cls' if os.name == 'nt' else 'clear')
 
 def cekPelatih(username):
     query = f"""

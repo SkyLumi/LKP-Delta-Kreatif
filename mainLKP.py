@@ -1,18 +1,14 @@
 import FiturAdmin as Fa
 import FiturPelatih as Fp
 import FiturSiswa as Fs
-import psycopg2
+from connectDatabase import database as db
 import Design as ui
 from tabulate import tabulate
-import os
+from clear import clear
 import time
 
-conn = psycopg2.connect(database='LKP Delta Kreatif', user='postgres', password='bebas', host='localhost', port=5432)
-
+conn = db()
 cur = conn.cursor()
-
-def clear():
-    os.system('cls' if os.name == 'nt' else 'clear')
 
 def check_credentials(table, username, password):
     query = f"SELECT username, password FROM {table} WHERE username = %s"
@@ -36,7 +32,7 @@ def Login():
             break
         elif check_credentials('pelatih', username, password):
             clear()
-            Fp.homepagePelatih()
+            Fp.homepagePelatih(username)
             break
         elif check_credentials('siswa', username, password):
             clear()
@@ -137,7 +133,7 @@ def startup():
                 Register()
             case 3:
                 print("Keluar...")
-                time.sleep(2)
+                time.sleep(1)
                 clear()
                 break
             case _:
